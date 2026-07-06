@@ -6,7 +6,7 @@ Dự án mẫu để chạy các công cụ security scan trên **GitHub Actions
 
 | Công cụ | Mục đích | Thư mục / file liên quan |
 |---------|----------|--------------------------|
-| [Checkov](https://www.checkov.io/) | Scan IaC (Terraform, Docker, K8s, Compose) | `infra/` |
+| [Checkov](https://www.checkov.io/) | Scan IaC (Terraform, Docker, K8s, Compose/YAML) | `infra/` |
 | [Gitleaks](https://github.com/gitleaks/gitleaks) | Phát hiện secret trong git | Toàn repo |
 | [ESLint](https://eslint.org/) | Lint JavaScript | `src/`, `eslint.config.js` |
 | [CodeQL](https://codeql.github.com/) | Phân tích bảo mật mã nguồn | `src/` |

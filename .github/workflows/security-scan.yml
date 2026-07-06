@@ -22,7 +22,7 @@ jobs:
         uses: bridgecrewio/checkov-action@v12
         with:
           directory: infra
-          framework: terraform,dockerfile,docker_compose,kubernetes
+          framework: terraform,dockerfile,kubernetes,yaml
           soft_fail: false
           output_format: cli
 
@@ -36,9 +36,10 @@ jobs:
           fetch-depth: 0
 
       - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
 
   eslint:
     name: ESLint
