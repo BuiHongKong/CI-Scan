@@ -62,7 +62,7 @@ Thêm **Repository secrets** trong GitHub:
 | `SONAR_TOKEN` | Token từ SonarQube Server hoặc SonarCloud |
 | `SONAR_HOST_URL` | URL server, ví dụ `https://sonarcloud.io` hoặc `https://sonar.your-company.com` |
 
-**SonarCloud:** tạo project với `sonar.projectKey=ci-scan` (khớp `sonar-project.properties`).
+**SonarCloud:** project key mặc định `BuiHongKong_CI-Scan` (khớp `sonar-project.properties`).
 
 **SonarQube Server:** cài scanner agent hoặc dùng action hiện tại với URL server nội bộ.
 
