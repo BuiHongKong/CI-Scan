@@ -1,6 +1,6 @@
 data "aws_iam_policy_document" "kms_key" {
   statement {
-    sid    = "Enable IAM User Permissions"
+    sid    = "Allow key administration for account root"
     effect = "Allow"
 
     principals {
@@ -8,8 +8,20 @@ data "aws_iam_policy_document" "kms_key" {
       identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
     }
 
-    actions   = ["kms:*"]
-    resources = ["*"]
+    actions = [
+      "kms:DescribeKey",
+      "kms:GetKeyPolicy",
+      "kms:GetKeyRotationStatus",
+      "kms:ListResourceTags",
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncryptFrom",
+      "kms:ReEncryptTo",
+      "kms:GenerateDataKey",
+      "kms:GenerateDataKeyWithoutPlaintext",
+    ]
+
+    resources = [aws_kms_key.app_data.arn]
   }
 
   statement {
@@ -24,9 +36,16 @@ data "aws_iam_policy_document" "kms_key" {
     actions = [
       "kms:Decrypt",
       "kms:GenerateDataKey",
+      "kms:DescribeKey",
     ]
 
-    resources = ["*"]
+    resources = [aws_kms_key.app_data.arn]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
+    }
   }
 }
 
@@ -58,6 +77,8 @@ data "aws_iam_policy_document" "sns_s3_publish" {
       values = [
         aws_s3_bucket.logs.arn,
         aws_s3_bucket.app_data.arn,
+        aws_s3_bucket.logs_replica.arn,
+        aws_s3_bucket.app_data_replica.arn,
       ]
     }
   }
@@ -154,6 +175,76 @@ resource "aws_iam_role_policy" "s3_replication" {
   policy = data.aws_iam_policy_document.s3_replication.json
 }
 
+resource "aws_kms_key" "replica" {
+  provider                = aws.replica
+  description             = "KMS key for ${var.project_name} replica S3 encryption"
+  enable_key_rotation     = true
+  deletion_window_in_days = 30
+}
+
+resource "aws_kms_alias" "replica" {
+  provider      = aws.replica
+  name          = "alias/${var.project_name}-${var.environment}-replica"
+  target_key_id = aws_kms_key.replica.key_id
+}
+
+data "aws_iam_policy_document" "kms_key_replica" {
+  statement {
+    sid    = "Allow key administration for account root"
+    effect = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
+
+    actions = [
+      "kms:DescribeKey",
+      "kms:GetKeyPolicy",
+      "kms:GetKeyRotationStatus",
+      "kms:ListResourceTags",
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncryptFrom",
+      "kms:ReEncryptTo",
+      "kms:GenerateDataKey",
+      "kms:GenerateDataKeyWithoutPlaintext",
+    ]
+
+    resources = [aws_kms_key.replica.arn]
+  }
+
+  statement {
+    sid    = "Allow S3 service to use the replica key"
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["s3.amazonaws.com"]
+    }
+
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey",
+      "kms:DescribeKey",
+    ]
+
+    resources = [aws_kms_key.replica.arn]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
+    }
+  }
+}
+
+resource "aws_kms_key_policy" "replica" {
+  provider = aws.replica
+  key_id   = aws_kms_key.replica.id
+  policy   = data.aws_iam_policy_document.kms_key_replica.json
+}
+
 resource "aws_s3_bucket" "logs_replica" {
   provider = aws.replica
   bucket   = "${var.project_name}-${var.environment}-logs-replica-${data.aws_caller_identity.current.account_id}"
@@ -182,6 +273,57 @@ resource "aws_s3_bucket_public_access_block" "logs_replica" {
   restrict_public_buckets = true
 }
 
+resource "aws_s3_bucket_server_side_encryption_configuration" "logs_replica" {
+  provider = aws.replica
+  bucket   = aws_s3_bucket.logs_replica.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.replica.arn
+    }
+    bucket_key_enabled = true
+  }
+}
+
+resource "aws_s3_bucket_logging" "logs_replica" {
+  provider = aws.replica
+  bucket   = aws_s3_bucket.logs_replica.id
+
+  target_bucket = aws_s3_bucket.logs_replica.id
+  target_prefix = "logs-replica-access/"
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "logs_replica" {
+  provider = aws.replica
+  bucket   = aws_s3_bucket.logs_replica.id
+
+  rule {
+    id     = "expire-old-versions"
+    status = "Enabled"
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+
+    noncurrent_version_expiration {
+      noncurrent_days = 90
+    }
+  }
+}
+
+resource "aws_s3_bucket_notification" "logs_replica" {
+  provider = aws.replica
+  bucket   = aws_s3_bucket.logs_replica.id
+
+  topic {
+    topic_arn = aws_sns_topic.s3_events.arn
+    events    = ["s3:ObjectCreated:*"]
+  }
+
+  depends_on = [aws_sns_topic_policy.s3_events]
+}
+
 resource "aws_s3_bucket" "app_data_replica" {
   provider = aws.replica
   bucket   = "${var.project_name}-${var.environment}-data-replica-${data.aws_caller_identity.current.account_id}"
@@ -208,6 +350,57 @@ resource "aws_s3_bucket_public_access_block" "app_data_replica" {
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "app_data_replica" {
+  provider = aws.replica
+  bucket   = aws_s3_bucket.app_data_replica.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.replica.arn
+    }
+    bucket_key_enabled = true
+  }
+}
+
+resource "aws_s3_bucket_logging" "app_data_replica" {
+  provider = aws.replica
+  bucket   = aws_s3_bucket.app_data_replica.id
+
+  target_bucket = aws_s3_bucket.logs_replica.id
+  target_prefix = "data-replica-access/"
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "app_data_replica" {
+  provider = aws.replica
+  bucket   = aws_s3_bucket.app_data_replica.id
+
+  rule {
+    id     = "expire-old-versions"
+    status = "Enabled"
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+
+    noncurrent_version_expiration {
+      noncurrent_days = 90
+    }
+  }
+}
+
+resource "aws_s3_bucket_notification" "app_data_replica" {
+  provider = aws.replica
+  bucket   = aws_s3_bucket.app_data_replica.id
+
+  topic {
+    topic_arn = aws_sns_topic.s3_events.arn
+    events    = ["s3:ObjectCreated:*"]
+  }
+
+  depends_on = [aws_sns_topic_policy.s3_events]
 }
 
 resource "aws_s3_bucket_replication_configuration" "logs" {

@@ -63,6 +63,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
     id     = "expire-old-versions"
     status = "Enabled"
 
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+
     noncurrent_version_expiration {
       noncurrent_days = 90
     }
@@ -127,6 +131,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "app_data" {
   rule {
     id     = "expire-old-versions"
     status = "Enabled"
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
 
     noncurrent_version_expiration {
       noncurrent_days = 90
