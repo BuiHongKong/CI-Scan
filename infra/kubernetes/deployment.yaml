@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ci-scan-app
+  namespace: ci-scan
   labels:
     app: ci-scan
 spec:
@@ -17,19 +18,19 @@ spec:
       automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
-        fsGroup: 1000
+        runAsUser: 10001
+        fsGroup: 10001
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: ci-scan
-          image: ci-scan:1.0.0
-          imagePullPolicy: IfNotPresent
+          image: node:20-alpine@sha256:658d0f63e501824d6c23e06a5bbf87293b7a965b78495e32861d341bb0399855
+          imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             runAsNonRoot: true
-            runAsUser: 1000
+            runAsUser: 10001
             capabilities:
               drop:
                 - ALL
@@ -52,3 +53,11 @@ spec:
                 - "process.exit(0)"
             initialDelaySeconds: 10
             periodSeconds: 30
+          readinessProbe:
+            exec:
+              command:
+                - node
+                - -e
+                - "process.exit(0)"
+            initialDelaySeconds: 5
+            periodSeconds: 10

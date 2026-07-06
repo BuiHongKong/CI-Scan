@@ -1,4 +1,11 @@
-name: "CI-Scan"
-paths-ignore:
-  - node_modules
-  - coverage
+title = "CI-Scan"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Ignore dependencies and generated files"
+paths = [
+  '''(?:^|/)node_modules(?:/.*)?$''',
+  '''(?:^|/)coverage(?:/.*)?$''',
+]
