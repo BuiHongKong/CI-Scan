@@ -55,12 +55,13 @@ Vào **Settings → Code security and analysis → Code scanning** và bật **C
 
 ### 3. Cấu hình SonarQube / SonarCloud
 
-Thêm **Repository secrets** trong GitHub:
+Thêm **Repository secret**:
 
 | Secret | Mô tả |
 |--------|-------|
-| `SONAR_TOKEN` | Token từ SonarQube Server hoặc SonarCloud |
-| `SONAR_HOST_URL` | URL server, ví dụ `https://sonarcloud.io` hoặc `https://sonar.your-company.com` |
+| `SONAR_TOKEN` | Access token từ SonarCloud (My Account → Access Token) |
+
+`SONAR_HOST_URL` đã hardcode `https://sonarcloud.io` trong workflow — không cần secret.
 
 **SonarCloud:** project key mặc định `BuiHongKong_CI-Scan` (khớp `sonar-project.properties`).
 
