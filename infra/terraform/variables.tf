@@ -36,3 +36,4 @@ variable "aws_region_replica" {
     error_message = "aws_region_replica must be a valid AWS region identifier."
   }
 }
+
