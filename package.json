@@ -1,0 +1,19 @@
+{
+  "name": "ci-scan",
+  "version": "1.0.0",
+  "description": "Sample project for CI security scanning",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "lint": "eslint src/**/*.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "eslint": "^9.17.0",
+    "globals": "^15.14.0"
+  }
+}

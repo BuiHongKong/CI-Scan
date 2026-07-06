@@ -1,0 +1,4 @@
+name: "CI-Scan"
+paths-ignore:
+  - node_modules
+  - coverage

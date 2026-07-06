@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ci-scan-app
+  labels:
+    app: ci-scan
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ci-scan
+  template:
+    metadata:
+      labels:
+        app: ci-scan
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ci-scan
+          image: ci-scan:1.0.0
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          livenessProbe:
+            exec:
+              command:
+                - node
+                - -e
+                - "process.exit(0)"
+            initialDelaySeconds: 10
+            periodSeconds: 30
