@@ -63,7 +63,16 @@ Thêm **Repository secret**:
 
 `SONAR_HOST_URL` đã hardcode `https://sonarcloud.io` trong workflow — không cần secret.
 
-**SonarCloud:** project key mặc định `BuiHongKong_CI-Scan` (khớp `sonar-project.properties`).
+**SonarCloud:** project key `BuiHongKong_CI-Scan`, organization `buihongkong` (trong `sonar-project.properties`).
+
+**Tắt Automatic Analysis** (bắt buộc khi scan qua GitHub Actions):
+
+1. [SonarCloud](https://sonarcloud.io) → project **CI-Scan**
+2. **Project Settings** → **Analysis Method**
+3. Tắt **SonarCloud Automatic Analysis**
+4. Giữ analysis qua **GitHub Actions / CI**
+
+Nếu không tắt, scanner báo lỗi: *"CI analysis while Automatic Analysis is enabled"*.
 
 **SonarQube Server:** cài scanner agent hoặc dùng action hiện tại với URL server nội bộ.
 
