@@ -25,3 +25,14 @@ variable "environment" {
     error_message = "environment must be dev, staging, or prod."
   }
 }
+
+variable "aws_region_replica" {
+  description = "AWS replica region for S3 cross-region replication"
+  type        = string
+  default     = "ap-southeast-2"
+
+  validation {
+    condition     = can(regex("^[a-z]{2}-[a-z]+-\\d$", var.aws_region_replica))
+    error_message = "aws_region_replica must be a valid AWS region identifier."
+  }
+}

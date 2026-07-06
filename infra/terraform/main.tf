@@ -56,6 +56,19 @@ resource "aws_s3_bucket_ownership_controls" "logs" {
   }
 }
 
+resource "aws_s3_bucket_lifecycle_configuration" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  rule {
+    id     = "expire-old-versions"
+    status = "Enabled"
+
+    noncurrent_version_expiration {
+      noncurrent_days = 90
+    }
+  }
+}
+
 resource "aws_s3_bucket" "app_data" {
   bucket = "${var.project_name}-${var.environment}-data-${data.aws_caller_identity.current.account_id}"
 

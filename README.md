@@ -23,6 +23,7 @@ CI-Scan/
 ├── infra/
 │   ├── terraform/           # Checkov — Terraform (AWS S3, VPC, SG)
 │   │   ├── main.tf
+│   │   ├── s3_compliance.tf
 │   │   ├── variables.tf
 │   │   ├── outputs.tf
 │   │   └── versions.tf

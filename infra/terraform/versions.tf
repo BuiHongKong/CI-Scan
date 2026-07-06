@@ -20,3 +20,16 @@ provider "aws" {
     }
   }
 }
+
+provider "aws" {
+  alias  = "replica"
+  region = var.aws_region_replica
+
+  default_tags {
+    tags = {
+      Project     = var.project_name
+      Environment = var.environment
+      ManagedBy   = "terraform"
+    }
+  }
+}
