@@ -1,0 +1,17 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ci-scan
+  title: CI-Scan
+  description: Demo repo chạy security scan (Checkov, Gitleaks, ESLint, CodeQL, SonarQ)
+  annotations:
+    github.com/project-slug: BuiHongKong/CI-Scan
+    sonarqube.org/project-key: default/BuiHongKong_CI-Scan
+  tags:
+    - security
+    - sonarqube
+spec:
+  type: service
+  lifecycle: experimental
+  owner: guests
+  system: security-tooling

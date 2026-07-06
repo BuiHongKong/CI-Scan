@@ -1,0 +1,8 @@
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: security-tooling
+  title: Security Tooling
+  description: Hệ thống demo và công cụ security scan
+spec:
+  owner: guests

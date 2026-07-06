@@ -37,6 +37,9 @@ CI-Scan/
 ├── src/
 │   ├── index.js             # Entry point
 │   └── utils.js             # Logic mẫu
+├── catalog-info.yaml        # Backstage Component
+├── catalog/
+│   └── system-security-tooling.yaml
 ├── eslint.config.js
 ├── sonar-project.properties
 ├── package.json
@@ -95,6 +98,69 @@ npm start
 ```
 
 **Không** chạy Checkov, Gitleaks, CodeQL, SonarQ trên local — các tool này chạy trên GitHub Actions.
+
+## Backstage (repo khác)
+
+File catalog trong repo này:
+
+| File | Mục đích |
+|------|----------|
+| [`catalog-info.yaml`](catalog-info.yaml) | Component `ci-scan` + annotation SonarQ |
+| [`catalog/system-security-tooling.yaml`](catalog/system-security-tooling.yaml) | System `security-tooling` |
+
+### 1. Đăng ký catalog trong Backstage
+
+Thêm vào `app-config.yaml` của repo Backstage:
+
+```yaml
+catalog:
+  locations:
+    - type: url
+      target: https://github.com/BuiHongKong/CI-Scan/blob/main/catalog-info.yaml
+    - type: url
+      target: https://github.com/BuiHongKong/CI-Scan/blob/main/catalog/system-security-tooling.yaml
+```
+
+Hoặc dùng `type: file` nếu clone local.
+
+### 2. Plugin SonarQube — `app-config.yaml`
+
+Annotation dùng `default/BuiHongKong_CI-Scan` → instance tên **`default`**:
+
+```yaml
+sonarqube:
+  instances:
+    - name: default
+      baseUrl: https://sonarcloud.io
+      apiKey: ${SONAR_TOKEN}
+```
+
+Đặt `SONAR_TOKEN` trong env hoặc `app-config.local.yaml` (không commit).
+
+Nếu chỉ cấu hình single instance (không `instances`), đổi annotation thành:
+
+```yaml
+sonarqube.org/project-key: BuiHongKong_CI-Scan
+```
+
+### 3. Plugin cần cài (repo Backstage)
+
+```bash
+yarn --cwd packages/app add @backstage-community/plugin-sonarqube
+yarn --cwd packages/backend add @backstage-community/plugin-sonarqube-backend
+```
+
+Backend `packages/backend/src/index.ts`:
+
+```typescript
+backend.add(import('@backstage-community/plugin-sonarqube-backend'));
+```
+
+Frontend: thêm `EntitySonarQubeCard` vào `EntityPage.tsx` (tab Overview).
+
+### 4. Kiểm tra
+
+Mở **Software Catalog → CI-Scan** → card SonarQube hiển thị Quality Gate và metrics từ SonarCloud.
 
 ## Security check
 
