@@ -9,7 +9,8 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 COPY --chown=appuser:appgroup src ./src
 
-USER appuser
+# DEMO: run as root — Checkov Dockerfile checks should fail
+USER root
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "process.exit(0)"

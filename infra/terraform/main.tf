@@ -155,6 +155,14 @@ resource "aws_security_group" "app" {
     cidr_blocks = [aws_vpc.main.cidr_block]
   }
 
+  ingress {
+    description = "DEMO: SSH open to world — Checkov should fail"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     description = "HTTPS to internet"
     from_port   = 443

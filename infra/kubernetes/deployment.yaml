@@ -24,13 +24,13 @@ spec:
           type: RuntimeDefault
       containers:
         - name: ci-scan
-          image: node:20-alpine@sha256:658d0f63e501824d6c23e06a5bbf87293b7a965b78495e32861d341bb0399855
-          imagePullPolicy: Always
+          image: node:20-alpine
+          imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             runAsNonRoot: true
-            runAsUser: 10001
+            runAsUser: 1000
             capabilities:
               drop:
                 - ALL
