@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ci-scan-app
-  namespace: ci-scan
   labels:
     app: ci-scan
 spec:
@@ -15,49 +14,33 @@ spec:
       labels:
         app: ci-scan
     spec:
-      automountServiceAccountToken: false
+      automountServiceAccountToken: true
+      hostNetwork: true
       securityContext:
-        runAsNonRoot: true
-        runAsUser: 10001
-        fsGroup: 10001
-        seccompProfile:
-          type: RuntimeDefault
+        runAsNonRoot: false
+        runAsUser: 0
+        fsGroup: 0
       containers:
         - name: ci-scan
-          image: node:20-alpine
+          image: node:latest
           imagePullPolicy: IfNotPresent
           securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            runAsNonRoot: true
-            runAsUser: 1000
+            allowPrivilegeEscalation: true
+            privileged: true
+            readOnlyRootFilesystem: false
+            runAsNonRoot: false
+            runAsUser: 0
             capabilities:
-              drop:
-                - ALL
-          resources:
-            limits:
-              cpu: "500m"
-              memory: "256Mi"
-            requests:
-              cpu: "100m"
-              memory: "128Mi"
+              add:
+                - SYS_ADMIN
+                - NET_ADMIN
+          resources: {}
           ports:
             - name: http
               containerPort: 3000
               protocol: TCP
           livenessProbe:
-            exec:
-              command:
-                - node
-                - -e
-                - "process.exit(0)"
-            initialDelaySeconds: 10
-            periodSeconds: 30
-          readinessProbe:
-            exec:
-              command:
-                - node
-                - -e
-                - "process.exit(0)"
-            initialDelaySeconds: 5
-            periodSeconds: 10
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 1
+            periodSeconds: 5

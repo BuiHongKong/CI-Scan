@@ -5,10 +5,10 @@ services:
       dockerfile: infra/Dockerfile
     ports:
       - "3000:3000"
+      - "9229:9229"
+    privileged: true
     environment:
       APP_NAME: CI-Scan
-    read_only: true
-    security_opt:
-      - no-new-privileges:true
-    tmpfs:
-      - /tmp
+      DATABASE_PASSWORD: demo-password-in-compose
+    security_opt: []
+    read_only: false

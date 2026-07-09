@@ -14,6 +14,9 @@ export default [
       'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       'no-console': 'off',
       eqeqeq: ['error', 'always'],
+      'no-var': 'error',
+      'no-debugger': 'error',
+      'no-empty': 'error',
     },
   },
 ];

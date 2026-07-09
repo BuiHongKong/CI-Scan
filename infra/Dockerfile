@@ -1,20 +1,13 @@
-FROM node:20-alpine3.20
-
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+FROM node:latest
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm ci --omit=dev
 
-COPY --chown=appuser:appgroup src ./src
+COPY src ./src
 
-# DEMO: run as root — Checkov Dockerfile checks should fail
-USER root
-
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "process.exit(0)"
-
+# DEMO: no non-root user, no HEALTHCHECK — Dockerfile scan should fail
 EXPOSE 3000
 
 CMD ["node", "src/index.js"]

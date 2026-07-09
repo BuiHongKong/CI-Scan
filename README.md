@@ -32,8 +32,7 @@ CI-Scan/
 │   ├── docker-compose.yml   # Checkov — Compose
 │   └── kubernetes/
 │       ├── namespace.yaml
-│       ├── deployment.yaml
-│       └── networkpolicy.yaml
+│       └── deployment.yaml
 ├── src/
 │   ├── index.js             # Entry point
 │   └── utils.js             # Logic mẫu

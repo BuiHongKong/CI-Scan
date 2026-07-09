@@ -2,8 +2,8 @@ data "aws_caller_identity" "current" {}
 
 resource "aws_kms_key" "app_data" {
   description             = "KMS key for ${var.project_name} S3 encryption"
-  enable_key_rotation     = true
-  deletion_window_in_days = 30
+  enable_key_rotation     = false
+  deletion_window_in_days = 7
 }
 
 resource "aws_kms_alias" "app_data" {
@@ -164,10 +164,10 @@ resource "aws_security_group" "app" {
   }
 
   egress {
-    description = "HTTPS to internet"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
+    description = "DEMO: all traffic outbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 

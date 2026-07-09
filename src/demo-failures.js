@@ -2,8 +2,8 @@
  * DEMO ONLY — intentional issues so security scans fail. Revert before production.
  */
 
-// Gitleaks: fake GitHub PAT pattern (not a real token)
-export const DEMO_LEAKED_TOKEN = 'ghp_0000000000000000000000000000000000000000';
+// Gitleaks: generic secret assignment (not ghp_ — blocked by GitHub Push Protection)
+export const DEMO_LEAKED_TOKEN = 'github_pat_demo_only_not_a_real_token_value';
 
 // ESLint: unused variable
 const unusedLintFailure = 'this triggers no-unused-vars';
@@ -17,4 +17,12 @@ export function runUserCode(input) {
 // Sonar: hardcoded credential smell
 export function getDemoDbPassword() {
   return 'SuperSecretDemoPassword123!';
+}
+
+export function getAnotherPassword() {
+  return 'AnotherHardcodedSecret456!';
+}
+
+export function getJwtSecret() {
+  return 'jwt-signing-secret-demo-not-for-production-use';
 }

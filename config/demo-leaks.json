@@ -1,0 +1,10 @@
+{
+  "demo": true,
+  "database": {
+    "password": "P@ssw0rd-Demo-Leak-12345",
+    "connection": "postgres://admin:SuperSecret@db.example.com:5432/prod"
+  },
+  "api_keys": {
+    "internal_service": "api_key=demo_internal_key_not_real_abcdefghijklmnop"
+  }
+}
